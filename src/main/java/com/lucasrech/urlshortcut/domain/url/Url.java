@@ -16,14 +16,23 @@ public class Url {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private String url;
+    @Column(nullable = false, name = "url")
+    private String longUrl;
 
     @Column(name = "short_url")
     private String shortUrl;
 
     @Column(nullable = false, name = "creation_date")
     private LocalDateTime createdAt;
+
+    public Url(String url, String shortUrl) {
+        this.longUrl = url;
+        this.shortUrl = shortUrl;
+        createdAt = LocalDateTime.now();
+    }
+
+    public Url() {
+    }
 
 
 }
