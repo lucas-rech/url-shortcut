@@ -2,6 +2,8 @@ package com.lucasrech.urlshortcut.service;
 
 import com.lucasrech.urlshortcut.domain.url.Url;
 import com.lucasrech.urlshortcut.domain.url.UrlRequest;
+import com.lucasrech.urlshortcut.exception.UrlAlreadyExistsException;
+import com.lucasrech.urlshortcut.exception.UrlNotFoundedException;
 import com.lucasrech.urlshortcut.repository.UrlRepository;
 import org.springframework.stereotype.Service;
 
@@ -21,7 +23,7 @@ public class UrlService {
                 Url newUrl = new Url(urlRequest.url(), shortUrl);
                 urlRepository.save(newUrl);
             } else {
-                throw new IllegalArgumentException("Url already exists");
+                throw new UrlAlreadyExistsException(urlRequest.url());
             }
         } catch (Exception e) {
             throw  new RuntimeException("Unexpected error.", e);
@@ -32,7 +34,7 @@ public class UrlService {
         if(urlRepository.existsByShortUrl(shortUrl)) {
             return urlRepository.findByShortUrl(shortUrl);
         } else {
-            throw new IllegalArgumentException("Url does not exist");
+            throw new UrlNotFoundedException();
         }
     }
 
@@ -41,7 +43,7 @@ public class UrlService {
             Url url = urlRepository.findByShortUrl(shortUrl);
             return url.getLongUrl();
         } else {
-            throw new IllegalArgumentException("Url does not exist");
+            throw new UrlNotFoundedException();
         }
 
     }
