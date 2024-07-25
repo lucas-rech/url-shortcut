@@ -19,4 +19,9 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(new ExceptionDTO(exception.getMessage(), "409"));
     }
 
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<ExceptionDTO> Unexpected(RuntimeException exception) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ExceptionDTO(exception.getMessage(), "500"));
+    }
+
 }

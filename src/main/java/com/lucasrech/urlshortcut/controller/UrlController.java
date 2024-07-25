@@ -29,7 +29,9 @@ public class UrlController {
     @GetMapping("/data")
     public ResponseEntity<OriginalUrlResponse> getShortUrl(@RequestBody ShortUrlDTO shortUrl) {
         Url url = urlService.getShortUrl(shortUrl.shortUrl());
-        OriginalUrlResponse responseUrl = new OriginalUrlResponse(url.getLongUrl(), url.getShortUrl(), url.getCreatedAt());
+        String formatedShortUrl = "localhost:8080/link/" + shortUrl.shortUrl(); //can be changed for env
+        OriginalUrlResponse responseUrl = new OriginalUrlResponse(url.getLongUrl(), formatedShortUrl, url.getCreatedAt());
+
         return ResponseEntity.ok().body(responseUrl);
 
     }
