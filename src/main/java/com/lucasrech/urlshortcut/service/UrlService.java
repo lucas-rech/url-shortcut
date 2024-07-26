@@ -5,8 +5,10 @@ import com.lucasrech.urlshortcut.domain.url.UrlRequest;
 import com.lucasrech.urlshortcut.exception.UrlAlreadyExistsException;
 import com.lucasrech.urlshortcut.exception.UrlNotFoundedException;
 import com.lucasrech.urlshortcut.repository.UrlRepository;
+import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.Random;
 
 @Service
@@ -17,20 +19,37 @@ public class UrlService {
     }
 
     public void createNewShortUrl(UrlRequest urlRequest) {
+        String shortUrl = generateShortUrl();
+        Url newUrl = new Url();
+
+        //Verify if the url have http or https protocol. In case NOT, then we add the protocol before save in database
+        if(!urlRequest.url().contains("https://") && !urlRequest.url().contains("http://")) {
+            newUrl.setLongUrl("https://" + urlRequest.url());
+            newUrl.setShortUrl(shortUrl);
+            newUrl.setCreatedAt(LocalDateTime.now());
+        } else {
+            newUrl.setLongUrl(urlRequest.url());
+            newUrl.setShortUrl(shortUrl);
+            newUrl.setCreatedAt(LocalDateTime.now());
+        }
+
         try {
-            if(!urlRepository.existsByLongUrl(urlRequest.url())) {
-                String shortUrl = generateShortUrl();
-                Url newUrl = new Url(urlRequest.url(), shortUrl);
+            if (!urlRepository.existsByLongUrl(newUrl.getLongUrl())) {
                 urlRepository.save(newUrl);
             } else {
-                throw new UrlAlreadyExistsException(urlRequest.url());
+                throw new UrlAlreadyExistsException(newUrl.getLongUrl());
             }
-        } catch (Exception e) {
-            throw  new RuntimeException("Unexpected error.", e);
+        } catch (DataAccessException e) {
+            throw new RuntimeException("Erro ao acessar o repositório de dados: " + e.getMessage(), e);
         }
     }
 
     public Url getShortUrl(String shortUrl) {
+        if(shortUrl.contains("/")) {
+            int lastSlashIndex = shortUrl.lastIndexOf("/");
+            shortUrl = shortUrl.substring(lastSlashIndex + 1);
+        }
+
         if(urlRepository.existsByShortUrl(shortUrl)) {
             return urlRepository.findByShortUrl(shortUrl);
         } else {
